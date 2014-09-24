@@ -2,7 +2,7 @@
 
 const int pingPin = 7;
 int ledPin = 13;
-Servo servo1;
+Servo topServo;
 
 
 int angle;
@@ -14,34 +14,11 @@ void setup() {
   // initialize serial communication:
   Serial.begin(9600);
   pinMode(ledPin, OUTPUT);
-  servo1.attach(9);
+  topServo.attach(10);
 }
 
 void loop()
 {
- // int position;
-  
-  //servo1.write(90);
-  //delay(1000);
-  //servo1.write(180);
-  //delay(1000);
-  //servo1.write(0);
-  //delay(1000);
-  
-  //for(position = 0; position < 180; position += 100)
-  //{
-    //servo1.write(position);  // Move to next position
-    //delay(20);               // Short pause to allow it to move
- // }
-
-  // Tell servo to go to 0 degrees, stepping by one degree
-
- // for(position = 180; position >= 0; position -= 100)
- // {                                
-  //  servo1.write(position);  // Move to next position
-  //  delay(20);               // Short pause to allow it to move
- // }
-  
   
   // establish variables for duration of the ping, 
   // and the distance result in inches and centimeters:
@@ -77,36 +54,27 @@ void loop()
   //This section is for when the user walks up to the installation
   //and the light turns on to let the user know he is close enough to 
   //begin using the force.
-      if (inches <=36) {
+//  
+      if (inches <=12) {
+        //this is the closest distance. the user holds up his arm and the topservo
+        //
           digitalWrite(ledPin, HIGH);
-          servo1.write(maxAngle);
-      }
-      else {
+          topServo.write(90);
+          delay(1000);
+          topServo.write(180);
+          
+      } else if (inches <=36){
+        digitalWrite(ledPin,HIGH);
+        
+      
+      }else {
           digitalWrite(ledPin,LOW);
-          servo1.write(minAngle);
+       //  topServo.write(minAngle);
       }
-      
-      
-  /*This section is for if the user is too close to the installation,
-  the light will blink and a noise will play saying "The force is too strong
-  with this one. DO I EVEN NEED TO HAVE THIS FUNCTION? 
-      
-      if (inches<=12) {
-          digitalWrite(ledPin,HIGH);
-          delay(50);
-          digitalWrite(ledPin,LOW);
-          delay(50);
-      }
-      else {
-          digitalWrite(ledPin,LOW);
-      }
-  */
-      
-     
-  //This section is for when the user holds up his hand to begin using
-  //the force. The PING))) sensor should trigger the top servo to begin
-  //winding up the string the Deathstar is hanging from.     
-  
+
+
+
+//ok
       
   
 }
