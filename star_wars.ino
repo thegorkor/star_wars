@@ -2,30 +2,55 @@
 
 const int pingPin = 7;
 int ledPin = 13;
-Servo topServo;
+Servo bottomServo;
 
 
-int angle;
-int minAngle = 0;
-int maxAngle = 720;
+int topServo = 10;//Define servo PWM control as digital 10
+int myangle = 10;//define variable angle
+int pulsewidth;//define variable pulse width
+int val;
 
+int forward = 20;
+int forwardFast = 1;
+int backward = 600; //increase to increase backward speed
+int backwardFast = 1000;
+
+int topRocker = 2;
+int bottomRocker = 3;
+
+boolean DeathStarShouldLower = false;
+
+boolean HasStartedMovingForward = false;
+ 
 
 void setup() {
-  // initialize serial communication:
-  Serial.begin(9600);
+ 
+  
   pinMode(ledPin, OUTPUT);
-  topServo.attach(10);
+  bottomServo.attach(4);
+
+  pinMode(topServo,OUTPUT);
+  Serial.begin(9600);
+  
 }
 
-void loop()
-{
+
+void loop(){
   
-  // establish variables for duration of the ping, 
-  // and the distance result in inches and centimeters:
+  while(DeathStarShouldLower == true){
+    servopulse(topServo,backward);
+    
+    if(digitalRead(bottomRocker) == HIGH){
+     DeathStarShouldLower = false; 
+     HasStartedMovingForward = false;
+    }
+    
+      
+  }
+  
+  
   long duration, inches, cm;
 
-  // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
-  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
   pinMode(pingPin, OUTPUT);
   digitalWrite(pingPin, LOW);
   delayMicroseconds(2);
@@ -33,54 +58,49 @@ void loop()
   delayMicroseconds(5);
   digitalWrite(pingPin, LOW);
 
-  // The same pin is used to read the signal from the PING))): a HIGH
-  // pulse whose duration is the time (in microseconds) from the sending
-  // of the ping to the reception of its echo off of an object.
   pinMode(pingPin, INPUT);
   duration = pulseIn(pingPin, HIGH);
 
-  // convert the time into a distance
   inches = microsecondsToInches(duration);
-  cm = microsecondsToCentimeters(duration);
-  
-  Serial.print(inches);
-  Serial.print("in, ");
-  Serial.print(cm);
-  Serial.print("cm");
-  Serial.println();
-  
+ 
   delay(100);
   
-  //This section is for when the user walks up to the installation
-  //and the light turns on to let the user know he is close enough to 
-  //begin using the force.
-//  
-      if (inches <=12) {
-        //this is the closest distance. the user holds up his arm and the topservo
-        //
-          digitalWrite(ledPin, HIGH);
-          topServo.write(90);
-          delay(1000);
-          topServo.write(180);
-          
-      } else if (inches <=36){
-        digitalWrite(ledPin,HIGH);
-        
-      
-      }else {
-          digitalWrite(ledPin,LOW);
-       //  topServo.write(minAngle);
-      }
-
-
-
-//ok
-      
+  if (inches <=12){
+   digitalWrite(ledPin, HIGH);
+   servopulse(topServo, forwardFast);
+   HasStartedMovingForward = true;
+  }else if(inches > 12 && inches < 36){
+    if(HasStartedMovingForward == true){
+      DeathStarShouldLower = true;
+      digitalWrite(ledPin, LOW);
+    }else{
+      digitalWrite(ledPin, HIGH);
+    }
+    
+  }else{
+     digitalWrite(ledPin,LOW);
+     if(HasStartedMovingForward == true){
+       DeathStarShouldLower = true;
+     }
   
+  }
+  
+  if(digitalRead(topRocker) == HIGH){
+    bottomServo.write (90);
+    delay(1000);
+    bottomServo.write (-90);
+    delay(1000);
+    DeathStarShouldLower = true;
+   
+  }
+  
+
 }
 
-long microsecondsToInches(long microseconds)
-{
+////////////////////////////////////////////////////
+
+
+long microsecondsToInches(long microseconds){
   // According to Parallax's datasheet for the PING))), there are
   // 73.746 microseconds per inch (i.e. sound travels at 1130 feet per
   // second).  This gives the distance travelled by the ping, outbound
@@ -89,10 +109,14 @@ long microsecondsToInches(long microseconds)
   return microseconds / 74 / 2;
 }
 
-long microsecondsToCentimeters(long microseconds)
-{
-  // The speed of sound is 340 m/s or 29 microseconds per centimeter.
-  // The ping travels out and back, so to find the distance of the
-  // object we take half of the distance travelled.
-  return microseconds / 29 / 2;
+
+void servopulse(int servopin,int spinSpeed){//define a pulse function
+
+  pulsewidth = (spinSpeed) + 400;//translate angle to a pulse width value between 500-2480
+  digitalWrite(servopin,HIGH);//pull the interface signal level to high
+  if(spinSpeed > 1){
+    delayMicroseconds(pulsewidth);//delay in microseconds
+  }
+  digitalWrite(servopin,LOW);//pull the interface signal level to low
+  
 }
