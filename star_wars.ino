@@ -10,7 +10,7 @@ int myangle = 10;//define variable angle
 int pulsewidth;//define variable pulse width
 int val;
 
-int forward = 20;
+int forward = 25;
 int forwardFast = 1;
 int backward = 600; //increase to increase backward speed
 int backwardFast = 1000;
@@ -67,7 +67,7 @@ void loop(){
   
   if (inches <=12){
    digitalWrite(ledPin, HIGH);
-   servopulse(topServo, forwardFast);
+   servopulse(topServo, forward);
    HasStartedMovingForward = true;
   }else if(inches > 12 && inches < 36){
     if(HasStartedMovingForward == true){
